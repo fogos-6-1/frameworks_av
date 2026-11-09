@@ -276,6 +276,9 @@ cc_library {
     }) + select(soong_config_variable("camera", "ext_lib"), {
         any @ flag_val: ["-DTARGET_PROVIDES_CAMERA_PROVIDER_EXT_LIB"],
         default: [],
+    }) + select(soong_config_variable("libcameraservice", "ignore_shutter_order"), {
+        true: ["-DCAMERA_IGNORE_SHUTTER_ORDER"],
+        default: [],
     }),
 
     whole_static_libs: select(soong_config_variable("libcameraservice", "ext_lib"), {

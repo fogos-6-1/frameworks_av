@@ -1318,10 +1318,19 @@ void notifyShutter(CaptureOutputStates& states, const camera_shutter_msg_t &msg)
                     states.nextZslShutterFrameNum = msg.frame_number + 1;
                 } else {
                     if (msg.frame_number < states.nextShutterFrameNum) {
+#ifdef CAMERA_IGNORE_SHUTTER_ORDER
+                        // Legacy Moto HDR can report a stale shutter frame number.
+                        // Drop it without making the device unusable or moving the
+                        // next expected shutter frame number backwards.
+                        ALOGW("Shutter notification out-of-order. Expected "
+                                "notification for frame %d, got frame %d",
+                                states.nextShutterFrameNum, msg.frame_number);
+#else
                         SET_ERR(CAMERA_HAL_CALLBACK_ERROR,
                             "Shutter notification out-of-order. Expected "
                                 "notification for frame %d, got frame %d",
                                 states.nextShutterFrameNum, msg.frame_number);
+#endif
                         return;
                     }
                     states.nextShutterFrameNum = msg.frame_number + 1;
